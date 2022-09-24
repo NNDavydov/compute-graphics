@@ -1,63 +1,68 @@
-let canvas_original = document.getElementById('original');
-let ctx_original = canvas_original.getContext('2d');
-
-let canvas_filtered = document.getElementById('filtered');
-let ctx_filtered = canvas_filtered.getContext('2d');
+let canvas = document.getElementById('canvas');
+let ctx = canvas.getContext('2d');
 
 
-let img = new Image();
-img.crossOrigin = "anonymus";
-img.src = "https://habrastorage.org/files/9a5/f62/2a5/9a5f622a50eb47c3b586157516e6d685.png";
+let width = canvas.width;
+let height = canvas.height;
+let radius = width / 4;
 
-let width = canvas_original.width
-let height = canvas_original.height
+ctx.beginPath();
+ctx.arc(width / 4, height / 4, radius, 0, 2 * Math.PI);
+ctx.stroke();
 
-img.onload = function () {
-    ctx_original.drawImage(img, 0, 0, width, height);
-
-    let data_original = ctx_original.getImageData(0, 0, width, height);
-    let data_filtered = ctx_filtered.createImageData(width, height);
-
-    let row_size = 3;
-    let col_size = 3;
-
-    for (let i = 0; i < width; i++) {
-        for (let j = 0; j < height; j++) {
-            let R = [];
-            let G = [];
-            let B = [];
-            let S = [];
-
-            for (let n = -col_size; n <= col_size; n++) {
-                for (let m = -row_size; m <= row_size; m++) {
-                    R.push(data_original.data[((j + m) * width + i + n) * 4]);
-                    G.push(data_original.data[((j + m) * width + i + n) * 4 + 1]);
-                    B.push(data_original.data[((j + m) * width + i + n) * 4 + 2]);
-                    S.push(data_original.data[((j + m) * width + i + n) * 4 + 3]);
-                }
-            }
+let angle = 0;
+let centre_x = width / 4;
+let centre_y = height / 4;
 
 
-            R = R.filter(el => el !== undefined)
-            R.sort((x, y) => x - y);
+function drawLine(x0, y0, x1, y1) {
+    let dy = y1 - y0;
+    let dx = x1 - x0;
 
-            console.log(R)
+    let sign_x = dx > 0 ? 1 : dx < 0 ? -1 : 0;
+    let sign_y = dy > 0 ? 1 : dy < 0 ? -1 : 0;
 
-            G = G.filter(el => el !== undefined)
-            G.sort((x, y) => x - y);
 
-            B = B.filter(el => el !== undefined)
-            B.sort((x, y) => x - y);
+    if (dx < 0) dx = -dx;
+    if (dy < 0) dy = -dy;
 
-            S = S.filter(el => el !== undefined)
-            S.sort((x, y) => x - y);
-
-            data_filtered.data[(j * width + i) * 4] = R[Math.floor(R.length / 2)];
-            data_filtered.data[(j * width + i) * 4 + 1] = G[Math.floor(G.length / 2)];
-            data_filtered.data[(j * width + i) * 4 + 2] = B[Math.floor(B.length / 2)];
-            data_filtered.data[(j * width + i) * 4 + 3] = S[Math.floor(S.length / 2)];
-
-        }
+    let pdx, pdy, es, el;
+    if (dx > dy) {
+        pdx = sign_x;
+        pdy = 0;
+        es = dy;
+        el = dx;
+    } else {
+        pdx = 0;
+        pdy = sign_y;
+        es = dx;
+        el = dy;
     }
-    ctx_filtered.putImageData(data_filtered, 0, 0, 0, 0, width, height);
+
+    let e = el / 2;
+    let t = 0;
+    let x = x0;
+    let y = y0;
+
+    ctx.fillRect(x, y, 1, 1);
+    while (t < el) {
+        console.log(e)
+        e -= es;
+        if (e < 0) {
+            e += el;
+            x += sign_x;
+            y += sign_y;
+        } else {
+            x += pdx;
+            y += pdy;
+        }
+        t += 1;
+        ctx.fillRect(x, y, 1, 1);
+    }
+
 }
+
+setInterval(() => {
+    drawLine(centre_x, centre_y, centre_x + radius * Math.sin(angle), centre_y + radius * Math.cos(angle));
+    angle += Math.PI / 60;
+}, 1000);
