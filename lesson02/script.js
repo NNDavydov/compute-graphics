@@ -9,7 +9,7 @@ let x0 = 0
 let y0 = 0
 
 let e = 0;
-let y = 0;
+let y = y0;
 context.fillRect(x0, y0, 1, 1);
 
 for (var x = x0 + 1; x < x1; x++) {
