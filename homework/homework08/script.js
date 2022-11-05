@@ -2,10 +2,54 @@ let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 
 function draw_line(P0, P1) {
-    ctx.beginPath()
-    ctx.moveTo(P0.x, P0.y)
-    ctx.lineTo(P1.x, P1.y)
-    ctx.stroke()
+    let x0 = P0.x;
+    let x1 = P1.x;
+    let y0 = P0.y;
+    let y1 = P1.y;
+
+    let dy = y1 - y0;
+    let dx = x1 - x0;
+
+    let sign_x = dx > 0 ? 1 : dx < 0 ? -1 : 0;
+    let sign_y = dy > 0 ? 1 : dy < 0 ? -1 : 0;
+
+
+    if (dx < 0) dx = -dx;
+    if (dy < 0) dy = -dy;
+
+    let pdx, pdy, es, el;
+    if (dx > dy) {
+        pdx = sign_x;
+        pdy = 0;
+        es = dy;
+        el = dx;
+    } else {
+        pdx = 0;
+        pdy = sign_y;
+        es = dx;
+        el = dy;
+    }
+
+    let e = el / 2;
+    let t = 0;
+    let x = x0;
+    let y = y0;
+
+    ctx.fillRect(x, y, 1, 1);
+    while (t < el) {
+        console.log(e)
+        e -= es;
+        if (e < 0) {
+            e += el;
+            x += sign_x;
+            y += sign_y;
+        } else {
+            x += pdx;
+            y += pdy;
+        }
+        t += 1;
+        ctx.fillRect(x, y, 1, 1);
+    }
 }
 
 function get_distance(P0, P1, P2) {
